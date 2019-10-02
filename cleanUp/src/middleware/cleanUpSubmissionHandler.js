@@ -343,11 +343,17 @@ module.exports = (router, resourceName, resourceId) => {
       });
     }
 
+    function disableSubmissionSave(req, done) {
+      req.skipSave = true;
+      done();
+    }
+
     // Add before handlers.
     const before = `before${method.method}`;
     handlers[before] = (req, res, next) => {
       req.handlerName = before;
       async.series([
+        async.apply(disableSubmissionSave, req),
         async.apply(loadCurrentForm, req),
         async.apply(initializeSubmission, req),
         async.apply(initializeActions, req, res),
