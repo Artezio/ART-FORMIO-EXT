@@ -8,7 +8,7 @@ If you don't familiar with [formio](https://github.com/formio/formio) check it o
 It's an alternative approach of using "/form/formId/submission";
 
 ## Usage
->/form/formId/cleanUp
+>/form/formPath/cleanUp
 
 This API allow you to omit "Submit" field from submission data.
 
