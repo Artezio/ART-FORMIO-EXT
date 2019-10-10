@@ -1,42 +1,22 @@
+'use strict';
+
 const express = require('express');
-const debug = require('debug')('formio:alias');
+const cleanUpSubmissionResource = require('./src/resources/cleanUpSubmissionResource');
+const replacePathWithId = require('./src/extensions/replacePathWithId');
+const serverOrigin = require('./server-origin');
 
-function identifyFormAlias(app) {
-    app.use((req, res, next) => {
-        const urlRegexp = /^\/form\/.+\/cleanup/i;
-        
-        if (urlRegexp.test(req.url) && app.formio) {
-            const queryParamsMatcher = req.url.match(/\?.*/);
-            const queryParams = Array.isArray(queryParamsMatcher) && queryParamsMatcher[0];
-            const cutUrl = req.url.substr(6);
-            const name = cutUrl.substring(0, cutUrl.match(/\/cleanup/i).index);
-
-            app.formio.cache.loadFormByAlias(req, name, function (error, form) {
-                if (error) {
-                    debug(`Error: ${error}`);
-                    return res.status(400).send('Invalid alias');
-                }
-                if (!form) {
-                    return res.status(404).send('Form not found.');
-                }
-                req.formId = form._id.toString();
-                req.url = `/form/${form._id}/cleanUp${queryParams ? queryParams : ''}`;
-                next();
-            })
-        } else {
-            next();
-        }
-    })
+function getApp(options) {
+    if (options && options.app && options.app.use) {
+        return options.app;
+    }
+    else {
+        return express();
+    }
 }
 
-module.exports = function (options) {
-    let app;
-    if (options && options.app && options.app.use) {
-        app = options.app;
-    } else {
-        app = express();
-    }
-    identifyFormAlias(app);
+module.exports = function(options) {
+    const app = getApp(options);
+    app.use(replacePathWithId(app));
 
     const enrichedOptions = {
         ...options,
@@ -45,12 +25,12 @@ module.exports = function (options) {
             ...(options && options.hooks),
             alter: {
                 ...(options && options.hooks && options.hooks.alter),
-                resources: function (resources) {
-                    resources.noValidateSubmission = require('./src/resources/cleanUpSubmissionResource')(resources.submission.app);
+                resources: function(resources) {
+                    resources.noValidateSubmission = cleanUpSubmissionResource(resources.submission.app);
                     return resources;
                 }
             }
         }
-    }
-    return require('./server-origin')(enrichedOptions);
-}
+    };
+    return serverOrigin(enrichedOptions);
+};
