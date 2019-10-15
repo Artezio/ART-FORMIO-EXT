@@ -1,18 +1,53 @@
 # Set of plugins for formio
 
-If you don't familiar with [formio](https://github.com/formio/formio) check it out [README](https://github.com/formio/formio).
+If you are not familiar with [formio](https://github.com/formio/formio) check it out [README](https://github.com/formio/formio).
 
 &nbsp;
 # Clean up plugin
-
-It's an alternative approach of using "/form/formId/submission";
+Validate data and omit extra fields. Data will not be saved into mongoDB
 
 ## Usage
->/form/formPath/cleanUp
 
-This API allow you to omit "Submit" field from submission data.
+>POST     /form/formPath/cleanUp
 
-## Install instruction: 
+## Example
+* *Form path*: user/login
+* *URL*: http://localhost:3001/form/user/login/cleanUp
+
+Request body: 
+```
+{
+  "data": {
+    "email": "admin@mail.com",
+    "password": "admin",
+    "submit": true,
+    "extraField": "extra data"
+  }
+}
+```
+Response:
+```
+{
+  "_id": "5d9df42196ea0532f4c0832c",
+  "owner": "5d9df42196ea0532f4c0832c",
+  "roles": [
+      "5d9df40296ea0532f4c0831e"
+  ],
+  "form": "5d9df40296ea0532f4c08322",
+  "data": {
+      "email": "admin@mail.com"
+  },
+  "access": [],
+  "externalIds": [],
+  "created": "2019-10-09T14:52:17.131Z",
+  "modified": "2019-10-09T14:52:17.132Z"
+}
+```
+
+
+
+
+## Install instruction:
 
 To install this patch, follow the instructions below:
 
