@@ -1,20 +1,23 @@
-# Set of plugins for formio
-
-If you are not familiar with [formio](https://github.com/formio/formio) check it out [README](https://github.com/formio/formio).
-
 &nbsp;
-# Clean up plugin
-Validate data and omit extra fields. Data will not be saved into mongoDB
+# Clean up plugin for form.io
+If you are not familiar with formio check it out [README](https://github.com/formio/formio).
+
+### This plugin was created for validating form and omitting extra fields.
+
+* The data will be validated
+* Extra fields will be omitted in the response
+* "Submit" field will be omitted in the response
+* Nothing will be stored in the mongo database
 
 ## Usage
 
->POST     /form/formPath/cleanUp
+>POST     /:formPath/cleanUp
 
 ## Example
-* *Form path*: user/login
-* *URL*: http://localhost:3001/form/user/login/cleanUp
+* *Example form path*: user/login
+* *URL*: http://localhost:3001/user/login/cleanUp
 
-Request body: 
+Request body:
 ```
 {
   "data": {
@@ -25,22 +28,12 @@ Request body:
   }
 }
 ```
-Response:
+Response data:
 ```
 {
-  "_id": "5d9df42196ea0532f4c0832c",
-  "owner": "5d9df42196ea0532f4c0832c",
-  "roles": [
-      "5d9df40296ea0532f4c0831e"
-  ],
-  "form": "5d9df40296ea0532f4c08322",
   "data": {
       "email": "admin@mail.com"
-  },
-  "access": [],
-  "externalIds": [],
-  "created": "2019-10-09T14:52:17.131Z",
-  "modified": "2019-10-09T14:52:17.132Z"
+  }
 }
 ```
 

@@ -3,14 +3,18 @@
 const debug = require('debug')('formio:alias');
 
 module.exports = function (router) {
-    const urlPattern = /(\/form\/)(.+)(\/cleanup.*)/i;
+    const urlPattern = /\/(.+)(\/cleanup.*)/i;
 
     function getAlias(url) {
-        return url.match(urlPattern)[2];
+        return url.match(urlPattern)[1];
     }
 
     function replacePathWithId(url, id) {
-        return url.replace(urlPattern, `$1${id}$3`);
+        return url.replace(urlPattern, `/${id}$2`);
+    }
+
+    function enrichPathWithFormPrefix(url) {
+        return '/form' + url;
     }
 
     return function (req, res, next) {
@@ -27,6 +31,7 @@ module.exports = function (router) {
                 }
                 req.formId = form._id.toString();
                 req.url = replacePathWithId(req.url, form._id);
+                req.url = enrichPathWithFormPrefix(req.url);
                 next();
             })
         } else {
