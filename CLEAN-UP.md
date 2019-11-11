@@ -9,13 +9,17 @@ If you are not familiar with formio check it out [README](https://github.com/for
 * "Submit" field will be omitted in the response
 * Nothing will be stored in the mongo database
 
+## Prerequisites
+
+* Formio server
+
 ## Usage
 
 >POST     /:formPath/cleanUp
 
 ## Example
-* *Example form path*: user/login
-* *URL*: http://localhost:3001/user/login/cleanUp
+* *Example form path*: formPass
+* *URL*: http://localhost:3001/formPass/cleanUp
 
 Request body:
 ```
@@ -44,12 +48,6 @@ Response data:
 
 To install this patch, follow the instructions below:
 
-1. Rename file "server.js" to "server-origin.js";
-2. Pull data from this repository. All you need is in the "cleanUp" folder.
-3. Add file server.js to the root dir(near "server-origin.js");
-4. Add file "cleanUpSubmissionResource.js" to src/resources;
-5. Add file "cleanUpSubmissionHandler.js" to src/middleware;
-6. Create folder extensions in src;
-7. Add file replacePathWithId.js to extensions folder.
-
-All files in "cleanUp" folder are in the same structure as in the root dir of formio, so you can simply merge "cleanUp" folder with formio folder, but don't forget about first step(rename server.js before merge).
+1. In your formio server root folder rename file "server.js" to "server-origin.js";
+2. Pull data from this repository.
+3. Paste all files to you formio server root folder.
