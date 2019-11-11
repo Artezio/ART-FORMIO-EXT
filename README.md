@@ -18,8 +18,11 @@ If you are not familiar with formio check it out [README](https://github.com/for
 >POST     /:formPath/cleanUp
 
 ## Example
-* *Example form path*: formPass
-* *URL*: http://localhost:3001/formPass/cleanUp
+We have a form in our formio server with two fields: "email" and "password". This form has following path: "formPath".
+
+Request URL:
+
+http://localhost:3001/formPath/cleanUp
 
 Request body:
 ```
@@ -41,7 +44,7 @@ Response data:
 }
 ```
 
-
+"password" field was removed from response due to another logic.
 
 
 ## Install instruction:
@@ -49,5 +52,4 @@ Response data:
 To install this patch, follow the instructions below:
 
 1. In your formio server root folder rename file "server.js" to "server-origin.js";
-2. Pull data from this repository.
-3. Paste all files to you formio server root folder.
+2. Copy server.js file and src folder from ART-FORMIO-EXT and paste them into your formio server root folder.
