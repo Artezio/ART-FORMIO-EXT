@@ -239,6 +239,54 @@ module.exports = (router, resourceName, resourceId) => {
       });
     }
 
+
+    function cleanSubmissionData(form, key, submission) {
+      const keys = [];
+      (function findAndAddKey(container) {
+        for (let k in container) {
+          if (typeof container[k] === 'object') {
+            findAndAddKey(container[k]);
+          }
+          if (k === key) {
+            keys.push(container[k]);
+          }
+        }
+      })(form);
+
+      function cleanData(data) {
+        const result = {};
+        keys.forEach(key => {
+          if (key in data) {
+            result[key] = data[key];
+          }
+        })
+        return result;
+      }
+
+      submission.data = _.omit(cleanData(submission.data), 'submit');
+      return { data: submission.data };
+    }
+
+    function cleanUpSubmission(req, res, done) {
+      // No need to validate on GET requests.
+      if (!(['POST', 'PUT', 'PATCH'].includes(req.method) && req.body && !req.noValidate)) {
+        return done();
+      }
+
+      // Assign submission data to the request body.
+      req.submission = req.submission || { data: {} };
+      if (!_.isEmpty(req.submission.data)) {
+        req.body.data = _.assign(req.body.data, req.submission.data);
+      }
+
+      // Clone the submission to the real value of the request body.
+      req.submission = _.cloneDeep(req.body);
+
+      const form = req.currentForm;
+      res.submission = cleanSubmissionData(form, 'key', req.body);
+      done();
+    }
+
     /**
      * Execute the actions.
      *
@@ -358,7 +406,8 @@ module.exports = (router, resourceName, resourceId) => {
         async.apply(initializeSubmission, req),
         async.apply(initializeActions, req, res),
         async.apply(executeFieldHandlers, false, req, res),
-        async.apply(validateSubmission, req, res),
+        async.apply(cleanUpSubmission, req, res),
+        // async.apply(validateSubmission, req, res),
         async.apply(executeFieldHandlers, true, req, res),
         async.apply(alterSubmission, req, res),
         async.apply(executeActions('before'), req, res)
