@@ -4,12 +4,14 @@ const _ = require('lodash');
 const async = require('async');
 const util = require('../util/util');
 const Validator = require('../resources/Validator');
+const cleanUpSubmissionData = require('../extensions/cleanUpSubmissionData');
 
 module.exports = (router, resourceName, resourceId) => {
   const hook = require('../util/hook')(router.formio);
   const fieldActions = require('../actions/fields')(router);
   const propertyActions = require('../actions/properties')(router);
   const handlers = {};
+
 
   // Iterate through the possible handlers.
   [
@@ -239,34 +241,6 @@ module.exports = (router, resourceName, resourceId) => {
       });
     }
 
-
-    function cleanSubmissionData(form, key, submission) {
-      const keys = [];
-      (function findAndAddKey(container) {
-        for (let k in container) {
-          if (typeof container[k] === 'object') {
-            findAndAddKey(container[k]);
-          }
-          if (k === key) {
-            keys.push(container[k]);
-          }
-        }
-      })(form);
-
-      function cleanData(data) {
-        const result = {};
-        keys.forEach(key => {
-          if (key in data) {
-            result[key] = data[key];
-          }
-        })
-        return result;
-      }
-
-      submission.data = _.omit(cleanData(submission.data), 'submit');
-      return { data: submission.data };
-    }
-
     function cleanUpSubmission(req, res, done) {
       // No need to validate on GET requests.
       if (!(['POST', 'PUT', 'PATCH'].includes(req.method) && req.body && !req.noValidate)) {
@@ -283,7 +257,9 @@ module.exports = (router, resourceName, resourceId) => {
       req.submission = _.cloneDeep(req.body);
 
       const form = req.currentForm;
-      res.submission = cleanSubmissionData(form, 'key', req.body);
+      if (req.body.data) {
+        res.submission = { data: _.omit(cleanUpSubmissionData(form, req.body), 'submit') };
+      }
       done();
     }
 
