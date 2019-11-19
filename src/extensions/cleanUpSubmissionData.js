@@ -58,6 +58,13 @@ function stripUnknown(data, schema) {
     if (Array.isArray(data)) {
         clearArrayOfPrimitiveTypes(data);
         removeUnmatchedObjects(data, schema);
+        data.forEach((element, i) => {
+            for (let key in element) {
+                if (typeof element[key] === 'object' && element[key] !== null) {
+                    stripUnknown(element[key], schema[i][key]);
+                }
+            }
+        })
     } else {
         for (let key in data) {
             if (data[key] !== null && typeof data[key] === 'object') {
