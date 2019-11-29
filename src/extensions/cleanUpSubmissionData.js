@@ -10,10 +10,10 @@ function saveToResult(key, result) {
 
 function extendResult(componentType, key, result) {
     if (arrayComponents.includes(componentType)) {
-        result[key] = [];
-    } else {
-        result[key] = {};
+        result[key] = [{}];
+        return result[key][0]
     }
+    result[key] = {};
     return result[key];
 }
 
@@ -23,7 +23,14 @@ function makeSchema(component, result) {
     } else if (component !== null && typeof component === 'object') {
         if (component.tree && Array.isArray(component.components)) {
             const link = extendResult(component.type, component.key, result);
-            component.components.forEach(component => makeSchema(component, link));
+            if (Array.isArray(link)) {
+                link.push({});
+                component.components.forEach((component, i) => {
+                    makeSchema(component, link[0])
+                });
+            } else {
+                component.components.forEach(component => makeSchema(component, link));
+            }
         } else if (component.input) {
             saveToResult(component.key, result);
         } else {
@@ -50,28 +57,33 @@ function removeUnmatchedObjects(array, schema) {
         const keys = Object.keys(element);
         return schema.some(el => ArrayHasArray(Object.keys(el), keys));
     })
+    filteredArray.forEach((element, i) => {
+        if (typeof element === "object") {
+            stripUnknown(element, schema[i]);
+        }
+    })
     array.splice(0, array.length, ...filteredArray);
 }
 
 function stripUnknown(data, schema) {
-    if (data === null) return;
+    if (typeof data !== 'object' || data === null || typeof schema !== 'object' || schema === null) return;
     if (Array.isArray(data)) {
+        if (!Array.isArray(schema)) {
+            data.splice(0, data.length);
+        }
         clearArrayOfPrimitiveTypes(data);
         removeUnmatchedObjects(data, schema);
-        data.forEach((element, i) => {
-            for (let key in element) {
-                if (typeof element[key] === 'object' && element[key] !== null) {
-                    stripUnknown(element[key], schema[i][key]);
-                }
-            }
-        })
     } else {
         for (let key in data) {
-            if (data[key] !== null && typeof data[key] === 'object') {
-                stripUnknown(data[key], schema[key]);
-            }
             if (!(key in schema)) {
                 delete data[key];
+            }
+            if (data[key] !== null && typeof data[key] === 'object') {
+                if (typeof schema[key] !== 'object' || schema[key] === null) {
+                    delete data[key];
+                } else {
+                    stripUnknown(data[key], schema[key]);
+                }
             }
         }
     }
